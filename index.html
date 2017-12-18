@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<head>
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<canvas id="acanvas" width="1366" height="768"></canvas>
+</body>
+<script src="chroma.min.js"></script>
+<script>
+        var acanvas = document.getElementById('acanvas');
+        var context = acanvas.getContext('2d');
+        const BALL_S = 15; //ball size
+        const BALL_MOV = 7 ; //movemnet speed
+        const COLLISION_OFFSET = 5; //compression on collision
+        const FPS = 60; //redraw frequency
+        const BALL_TRAIL = 10+5;
+
+        ball_movx = BALL_MOV;
+        ball_movy = BALL_MOV;
+        var ballx = acanvas.width/2-BALL_S/2;
+        var bally = acanvas.height/2-BALL_S/2;
+        var ball_comp = [
+            {color:'#8cbeff', arc_length:360, rotation_speed:0, size_offset:0,rotaion:0},
+            {color:'white', arc_length:60, rotation_speed:3, size_offset:0,rotaion:0},
+            {color:'#87ff00', arc_length:90, rotation_speed:7, size_offset:0,rotaion:0},
+            {color:'#ff0000', arc_length:120, rotation_speed:5, size_offset:0,rotaion:0},
+            {color:'#ffd000', arc_length:180, rotation_speed:10, size_offset:0,rotaion:0}
+        ];
+
+        window.onload = function() {            
+        setInterval(function() {
+            drawAll();
+            updatePositons();
+        },1000/FPS);
+        }
+
+        function updatePositons() {
+        if(bally >= acanvas.height-BALL_S+COLLISION_OFFSET || bally <= BALL_S-COLLISION_OFFSET) {
+            ball_movy = -ball_movy;
+        }
+        if(ballx >= acanvas.width-BALL_S+COLLISION_OFFSET || ballx <= BALL_S-COLLISION_OFFSET) {
+            ball_movx = -ball_movx;
+        }
+        ballx += ball_movx;
+        bally += ball_movy;
+        }
+
+        function drawAll() {
+        context.fillStyle = 'black';
+        context.fillRect(0,0,acanvas.width,acanvas.height);
+        drawBall(Number(BALL_TRAIL));
+        }
+
+        function drawBall(ball_trail,x=0,y=0) {
+        if(ball_trail != 0) {
+            ball_trail--;
+            drawBall(ball_trail,(BALL_TRAIL-ball_trail)*ball_movx,(BALL_TRAIL-ball_trail)*ball_movy);
+        }
+        ball_comp.forEach(function(arcObj)  {
+            context.fillStyle=chroma.hex(arcObj.color).darker(10-ball_trail).hex();
+            context.beginPath();
+            context.arc(ballx-x, bally-y, BALL_S+arcObj.size_offset, (Math.PI*arcObj.rotaion)/180, (Math.PI*(arcObj.arc_length+arcObj.rotaion))/180);
+            context.lineTo(ballx-x, bally-y);
+            context.closePath();
+            context.fill();
+            if(x == 0 && y == 0) {
+                arcObj.rotaion += arcObj.rotation_speed;
+            }
+        });
+        }
+    </script>
+</html>
