@@ -16,7 +16,7 @@
         const BALL_MOV = 7 ; //movemnet speed
         const COLLISION_OFFSET = 5; //compression on collision
         const FPS = 60; //redraw frequency
-        const BALL_TRAIL = 10;
+        const BALL_TRAIL = 5;
 
         ball_movx = BALL_MOV;
         ball_movy = BALL_MOV;
@@ -52,16 +52,23 @@
         function drawAll() {
         context.fillStyle = 'black';
         context.fillRect(0,0,acanvas.width,acanvas.height);
+
+        context.fillStyle = 'white';
+        for (i=0;i<acanvas.height;i+=45)
+        context.fillRect(acanvas.width/2-5,i,5,30);
+
+        context.fillStyle = Color('#000000').setAlpha(0); //Color: setting draw over to 0 alpha.
         drawBall(Number(BALL_TRAIL));
         }
 
         function drawBall(ball_trail,x=0,y=0) {
         if(ball_trail != 0) {
             ball_trail--;
-            drawBall(ball_trail,(BALL_TRAIL-ball_trail)*ball_movx,(BALL_TRAIL-ball_trail)*ball_movy);
+            var trail_index = (BALL_TRAIL-ball_trail);
+            drawBall(ball_trail,trail_index*ball_movx,trail_index*ball_movy);
         }
         ball_comp.forEach(function(arcObj)  {
-            context.fillStyle = Color(arcObj.color).setAlpha(1/(BALL_TRAIL-ball_trail)).setLightness(1/(BALL_TRAIL-ball_trail));
+            context.fillStyle = Color(arcObj.color).setAlpha(1/trail_index).setLightness(1/trail_index);
             context.beginPath();
             context.arc(ballx-x, bally-y, BALL_S+arcObj.size_offset, (Math.PI*arcObj.rotaion)/180, (Math.PI*(arcObj.arc_length+arcObj.rotaion))/180);
             context.lineTo(ballx-x, bally-y);
