@@ -9,14 +9,16 @@
 </body>
 <script src="color.js"></script>
 <script>
+        var background = new Image();
+        background.src = "back.png"; //background image
         var acanvas = document.getElementById('acanvas');
         var context = acanvas.getContext('2d');
         var Color = net.brehaut.Color;
         const BALL_S = 15; //ball size
-        const BALL_MOV = 7 ; //movemnet speed
+        const BALL_MOV = 8 ; //movemnet speed
         const COLLISION_OFFSET = 5; //compression on collision
         const FPS = 60; //redraw frequency
-        const BALL_TRAIL = 5;
+        const BALL_TRAIL = 5; //trail length
 
         ball_movx = BALL_MOV;
         ball_movy = BALL_MOV;
@@ -50,8 +52,9 @@
         }
 
         function drawAll() {
-        context.fillStyle = 'black';
-        context.fillRect(0,0,acanvas.width,acanvas.height);
+        // context.fillStyle = 'black';
+        // context.fillRect(0,0,acanvas.width,acanvas.height);
+        context.drawImage(background,0,0); 
 
         context.fillStyle = 'white';
         for (i=0;i<acanvas.height;i+=45)
@@ -74,7 +77,7 @@
             context.lineTo(ballx-x, bally-y);
             context.closePath();
             context.fill();
-            if(x == 0 && y == 0) {
+            if(trail_index == 1) {
                 arcObj.rotaion += arcObj.rotation_speed;
             }
         });
