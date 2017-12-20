@@ -15,94 +15,110 @@
         var acanvas = document.getElementById('acanvas');
         var context = acanvas.getContext('2d');
         var Color = net.brehaut.Color;
+        var mouseX,mouseY;
 
         const BALL_S = 8; //ball size
-        const BALL_MOV = 5; //movemnet speed
+        const BALL_MOV = 8; //movemnet speed
         const COLLISION_OFFSET = 5; //compression on collision
         const FPS = 60; //redraw frequency
-        const BALL_TRAIL = 1; //trail length
+        const BALL_TRAIL = 6; //trail length
         ball_movx = BALL_MOV;
         ball_movy = BALL_MOV;
         var ballX = acanvas.width/2-BALL_S/2;
         var ballY = acanvas.height/2-BALL_S/2;
         var ball_comp = [
-            //{color:'#51D6FF', arc_start:0, arc_end:360, rotation_speed:0, size_offset:0,rotaion:0},
+            // {color:'#51D6FF', arc_start:0, arc_end:360, rotation_speed:0, size_offset:0,rotaion:0},
             {color:'#FFFFFF', arc_start:0, arc_end:120, rotation_speed:3, size_offset:0,rotaion:0},
             {color:'#88FF51', arc_start:125, arc_end:240, rotation_speed:3, size_offset:0,rotaion:0},
             {color:'#51D6FF', arc_start:245, arc_end:360, rotation_speed:3, size_offset:0,rotaion:0},
         ];
 
-        const BAR_WIDTH = acanvas.width/75;
-        const BAR_HEIGHT = acanvas.height/5;
-        var lbarX=0,lbarY=0,lbarW=BAR_WIDTH,lbarH=BAR_HEIGHT;
-        var rbarX=0,rbarY=0,rbarW=BAR_WIDTH,rbarH=BAR_HEIGHT;
+        const BAR_WIDTH = acanvas.width/65;
+        const BAR_HEIGHT = acanvas.height/4;
+        const BAR_COLOR = Color('#FFFFFF').setAlpha(0.8);
+        var lbarX=0, lbarY=0;
+        var rbarX=acanvas.width - BAR_WIDTH, rbarY=0;
 
         window.onload = function() {            
-        setInterval(function() {
-            bindEvents();
-            drawAll();
-            updatePositons();
-        },1000/FPS);
-        }
-
-        function updatePositons() {
-        //ball diflection from canvas edge
-        if(ballY >= acanvas.height-BALL_S+COLLISION_OFFSET || ballY <= BALL_S-COLLISION_OFFSET) {
-            ball_movy = -ball_movy;
-        }
-        if(ballX >= acanvas.width-BALL_S+COLLISION_OFFSET || ballX <= BALL_S-COLLISION_OFFSET) {
-            ball_movx = -ball_movx;
-        }
-        //ball diflection from bars
-        if (ballX < lbarX+BAR_WIDTH && +(lbarY-ballY)<BAR_HEIGHT) {
-            console.log('shit');
-        }
-        ballX += ball_movx;
-        ballY += ball_movy;
-        }
-
-        function drawAll() {
-        context.fillStyle = 'black';
-        context.fillRect(0,0,acanvas.width,acanvas.height);
-        //context.drawImage(background,0,0); 
-
-        context.fillStyle = 'white';
-        for (i=0;i<acanvas.height;i+=45)
-        context.fillRect(acanvas.width/2-5,i,5,30);
-
-        context.fillStyle = Color('#000000').setAlpha(0); //Color: setting draw over to 0 alpha.
-        drawBall(Number(BALL_TRAIL));
-        drawLBars();
-        }
-
-        function drawBall(ball_trail,x=0,y=0) {
-        if(ball_trail != 0) {
-            ball_trail--;
-            var trail_index = (BALL_TRAIL-ball_trail);
-            drawBall(ball_trail,trail_index*ball_movx,trail_index*ball_movy);
-        }
-        ball_comp.forEach(function(arcObj)  {
-            context.fillStyle = Color(arcObj.color).setAlpha(1/trail_index).setLightness(1/trail_index);
-            context.beginPath();
-            context.arc(ballX-x, ballY-y, BALL_S+arcObj.size_offset, (Math.PI*(arcObj.arc_start+arcObj.rotaion))/180, (Math.PI*(arcObj.arc_end+arcObj.rotaion))/180);
-            context.lineTo(ballX-x, ballY-y);
-            context.closePath();
-            context.fill();
-            if(trail_index == 1) {
-                arcObj.rotaion += arcObj.rotation_speed;
-            }
-        });
+            setInterval(function() {
+                bindEvents();
+                drawAll();
+                updatePositons();
+            },1000/FPS);
         }
         function bindEvents()  {
         acanvas.addEventListener('mousemove',function(event) {
-            lbarX = event.clientX;
-            lbarY = event.clientY;
+            mouseX = event.clientX;
+            mouseY = event.clientY;
         });
-        }   
+        }
+
+        function updatePositons() {
+            lbarY = mouseY - BAR_HEIGHT/2;
+            //ball diflection from canvas edge
+            if(ballY >= acanvas.height-BALL_S+COLLISION_OFFSET || ballY <= BALL_S-COLLISION_OFFSET) {
+                ball_movy = -ball_movy;
+            }
+            if(ballX >= acanvas.width-BALL_S+COLLISION_OFFSET || ballX <= BALL_S-COLLISION_OFFSET) {
+                ball_movx = -ball_movx;
+            }
+            //ball diflection from bars
+            var lbarCF = 2*Math.abs(ballY-lbarY-BAR_HEIGHT/2)/BAR_HEIGHT;
+            var rbarCF = 2*Math.abs(ballY-rbarY-BAR_HEIGHT/2)/BAR_HEIGHT;
+            if ((ballX < lbarX+BAR_WIDTH && lbarCF <= 1)||
+                (ballX > rbarX && rbarCF <= 1)) {
+                deflection = getDeflection(ballX < BAR_WIDTH? lbarCF: rbarCF);
+                ball_movx =  ball_movx*deflection.X;
+                ball_movy =  ball_movy*deflection.Y;
+            }
+            ballX += ball_movx;
+            ballY += ball_movy;
+            function getDeflection(barCF) {
+                var factor = 2;
+                if(barCF < 0.3)
+                factor = -3;
+                return {X:-1, Y:barCF*factor};
+            }
+        }
+
+
+        function drawAll() {
+            context.fillStyle = 'black';
+            context.fillRect(0,0,acanvas.width,acanvas.height);
+            //context.drawImage(background,0,0); 
+
+            context.fillStyle = 'white';
+            for (i=0;i<acanvas.height;i+=45)
+            context.fillRect(acanvas.width/2-5,i,5,30);
+
+            context.fillStyle = Color('#000000').setAlpha(0); //Color: setting draw over to 0 alpha.
+            drawBall(Number(BALL_TRAIL));
+            drawLBars();
+        }
+
+        function drawBall(ball_trail,x=0,y=0) {
+            if(ball_trail != 0) {
+                ball_trail--;
+                var trail_index = (BALL_TRAIL-ball_trail);
+                drawBall(ball_trail,trail_index*ball_movx,trail_index*ball_movy);
+            }
+            ball_comp.forEach(function(arcObj)  {
+                context.fillStyle = Color(arcObj.color).setAlpha(1/trail_index).setLightness(1/trail_index);
+                context.beginPath();
+                context.arc(ballX-x, ballY-y, BALL_S+arcObj.size_offset, (Math.PI*(arcObj.arc_start+arcObj.rotaion))/180, (Math.PI*(arcObj.arc_end+arcObj.rotaion))/180);
+                context.lineTo(ballX-x, ballY-y);
+                context.closePath();
+                context.fill();
+                if(trail_index == 1) {
+                    arcObj.rotaion += arcObj.rotation_speed;
+                }
+            });
+        }
+   
         function drawLBars() {
-            context.fillStyle = Color('#FFFFFF').setAlpha(0.9);
-            context.fillRect(0,lbarY - lbarH/2,lbarW,lbarH);
-            context.fillRect(acanvas.width - rbarW,rbarY,rbarW,rbarH);
+            context.fillStyle = BAR_COLOR;
+            context.fillRect(lbarX, lbarY, BAR_WIDTH,BAR_HEIGHT);
+            context.fillRect(rbarX,rbarY,BAR_WIDTH,BAR_HEIGHT);
         }
     </script>
 </html>
