@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
-<canvas id="acanvas" width="1366" height="768"></canvas>
+<canvas id="acanvas" width="1366" height="768">
+</canvas>
 </body>
 <script src="color.js"></script>
 <script>
         var background = new Image();
-        background.src = "back.png"; //background image
+        background.src = "back2.png"; //background image
         var acanvas = document.getElementById('acanvas');
         var context = acanvas.getContext('2d');
         var Color = net.brehaut.Color;
@@ -25,12 +26,10 @@
         var ballx = acanvas.width/2-BALL_S/2;
         var bally = acanvas.height/2-BALL_S/2;
         var ball_comp = [
-            {color:'#8cbeff', arc_length:360, rotation_speed:0, size_offset:0,rotaion:0},
-            {color:'#ffffff', arc_length:60, rotation_speed:3, size_offset:0,rotaion:0},
-            {color:'#87ff00', arc_length:90, rotation_speed:7, size_offset:0,rotaion:0},
-            {color:'#ff0000', arc_length:120, rotation_speed:5, size_offset:0,rotaion:0},
-            // {color:'#ffd000', arc_length:180, rotation_speed:10, size_offset:0,rotaion:0},
-            // {color:'#ff00ae', arc_length:200, rotation_speed:10, size_offset:0,rotaion:0}
+            //{color:'#51D6FF', arc_start:0, arc_end:360, rotation_speed:0, size_offset:0,rotaion:0},
+            {color:'#FFFFFF', arc_start:0, arc_end:120, rotation_speed:3, size_offset:0,rotaion:0},
+            {color:'#88FF51', arc_start:125, arc_end:240, rotation_speed:3, size_offset:0,rotaion:0},
+            {color:'#51D6FF', arc_start:245, arc_end:360, rotation_speed:3, size_offset:0,rotaion:0},
         ];
 
         window.onload = function() {            
@@ -73,7 +72,7 @@
         ball_comp.forEach(function(arcObj)  {
             context.fillStyle = Color(arcObj.color).setAlpha(1/trail_index).setLightness(1/trail_index);
             context.beginPath();
-            context.arc(ballx-x, bally-y, BALL_S+arcObj.size_offset, (Math.PI*arcObj.rotaion)/180, (Math.PI*(arcObj.arc_length+arcObj.rotaion))/180);
+            context.arc(ballx-x, bally-y, BALL_S+arcObj.size_offset, (Math.PI*(arcObj.arc_start+arcObj.rotaion))/180, (Math.PI*(arcObj.arc_end+arcObj.rotaion))/180);
             context.lineTo(ballx-x, bally-y);
             context.closePath();
             context.fill();
