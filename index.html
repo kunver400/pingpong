@@ -17,8 +17,8 @@
         var Color = net.brehaut.Color;
         var mouseX,mouseY;
 
-        const BALL_S = 8; //ball size
-        const BALL_MOV = 8; //movemnet speed
+        const BALL_S = acanvas.width*acanvas.height/55555; //ball size
+        const BALL_MOV = 8; //movement speed
         const COLLISION_OFFSET = 5; //compression on collision
         const FPS = 60; //redraw frequency
         const BALL_TRAIL = 6; //trail length
@@ -32,6 +32,10 @@
             {color:'#88FF51', arc_start:125, arc_end:240, rotation_speed:3, size_offset:0,rotaion:0},
             {color:'#51D6FF', arc_start:245, arc_end:360, rotation_speed:3, size_offset:0,rotaion:0},
         ];
+
+        const DASH_W = acanvas.width/1000;
+        const DASH_H = acanvas.height/20;
+        const DASH_GAP = acanvas.height/45;
 
         const BAR_WIDTH = acanvas.width/65;
         const BAR_HEIGHT = acanvas.height/4;
@@ -94,13 +98,13 @@
 
 
         function drawAll() {
-            context.fillStyle = 'black';
+            context.drawImage(background,0,0,background.width,background.height,0,0,acanvas.width,acanvas.height); 
+            context.fillStyle = Color('#FFFFFF').setAlpha(0.2);
             context.fillRect(0,0,acanvas.width,acanvas.height);
-            //context.drawImage(background,0,0); 
 
-            context.fillStyle = 'white';
-            for (i=0;i<acanvas.height;i+=45)
-            context.fillRect(acanvas.width/2-5,i,5,30);
+            context.fillStyle = '#FFFFFF';
+            for (i=0;i<acanvas.height;i+=DASH_H+DASH_GAP)
+            context.fillRect(acanvas.width/2-DASH_W,i,DASH_W,DASH_H);
 
             context.fillStyle = Color('#000000').setAlpha(0); //Color: setting draw over to 0 alpha.
             drawBall(Number(BALL_TRAIL));
