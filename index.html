@@ -22,6 +22,7 @@
         const COLLISION_OFFSET = 5; //compression on collision
         const FPS = 60; //redraw frequency
         const BALL_TRAIL = 6; //trail length
+        const DEFLECTIONS = [1.7,1.5,1.2,-0.8,-0.5]
         ball_movx = BALL_MOV;
         ball_movy = BALL_MOV;
         var ballX = acanvas.width/2-BALL_S/2;
@@ -93,15 +94,15 @@
                 coefficent = Math.round(barCF*10)/10;
                 switch (coefficent) {
                     case 0:
-                        factor = -0.5; break;
+                        factor = DEFLECTIONS[4]; break;
                     case 1:
-                        factor = 1.7; break;
+                        factor = DEFLECTIONS[0]; break;
                     case 0.9: case 0.8: case 0.7:
-                        factor = 1.5; break;
+                        factor = DEFLECTIONS[1]; break;
                     case 0.6: case 0.5: case 0.4: case 0.3:
-                        factor = 1.2; break;
+                        factor = DEFLECTIONS[2]; break;
                     default:
-                        factor = -0.8;
+                        factor = DEFLECTIONS[3];
                 }
                 return {X:-1, Y:factor};
             }
@@ -114,7 +115,7 @@
                 ballX = acanvas.width/2-BALL_S/2;
                 ballY = acanvas.height/2-BALL_S/2;
                 if(Math.abs(ball_movy)<2) // get random mov when movy too low.
-                    ball_movy += (Math.floor(Math.random() * BALL_MOV) -BALL_MOV)*(Math.abs(ball_movy)/ball_movy);
+                    ball_movy += (Math.floor(Math.random() * BALL_MOV*DEFLECTIONS[0]) -BALL_MOV*DEFLECTIONS[0])*(Math.abs(ball_movy)/ball_movy);
                 ball_paint = true;
                 setTimeout(function(){
                 ball_movy = ball_movy/1.2;
