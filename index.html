@@ -28,10 +28,11 @@
         var ballY = acanvas.height/2-BALL_S/2;
         var ball_comp = [
             // {color:'#51D6FF', arc_start:0, arc_end:360, rotation_speed:0, size_offset:0,rotaion:0},
-            {color:'#FFFFFF', arc_start:0, arc_end:120, rotation_speed:3, size_offset:0,rotaion:0},
+            {color:'#E51A00', arc_start:0, arc_end:120, rotation_speed:3, size_offset:0,rotaion:0},
             {color:'#88FF51', arc_start:125, arc_end:240, rotation_speed:3, size_offset:0,rotaion:0},
             {color:'#51D6FF', arc_start:245, arc_end:360, rotation_speed:3, size_offset:0,rotaion:0},
         ];
+        var ball_draw = true,ball_paint = true;
 
         const DASH_W = acanvas.width/1000;
         const DASH_H = acanvas.height/20;
@@ -62,27 +63,31 @@
             mouseY && (lbarY = mouseY - BAR_HEIGHT/2);
             //RPlayer logic call
             rbarY = cpuPlaysR();
-            //ball diflection from canvas edge
-            if(ballY >= acanvas.height-BALL_S-COLLISION_OFFSET || ballY <= BALL_S+COLLISION_OFFSET) {
-                ball_movy = -ball_movy;
-            }
-            if(ballX >= acanvas.width-BALL_S-COLLISION_OFFSET || ballX <= BALL_S+COLLISION_OFFSET) {
-                ball_movx = -ball_movx;
-            }
-            //ball diflection from bars
-            var lbarCF = 2*Math.abs(ballY-lbarY-BAR_HEIGHT/2)/BAR_HEIGHT;
-            var rbarCF = 2*Math.abs(ballY-rbarY-BAR_HEIGHT/2)/BAR_HEIGHT;
-            if ((ballX < lbarX+BAR_WIDTH+BALL_S+COLLISION_OFFSET && lbarCF <= 1)||
-                (ballX > rbarX-BALL_S-COLLISION_OFFSET && rbarCF <= 1)) {
-                    console.log(lbarCF,rbarCF);
-                deflection = getDeflection(ballX < BAR_WIDTH+BALL_S+COLLISION_OFFSET? lbarCF: rbarCF);
-                ball_movx =  ball_movx*deflection.X;
-                ball_movy =  ball_movy*deflection.Y;
-            }
-            else if(ballX <= BALL_S+COLLISION_OFFSET+BAR_WIDTH || ballX >= acanvas.width-BALL_S-COLLISION_OFFSET-BAR_WIDTH) {
-                ballX = acanvas.width/2-BALL_S/2;
-                ballY = acanvas.height/2-BALL_S/2;
-                ball_movy = ball_movy/1.2;
+            if(ball_draw) {
+                //ball diflection from canvas edge
+                if(ballY >= acanvas.height-BALL_S-COLLISION_OFFSET || ballY <= BALL_S+COLLISION_OFFSET) {
+                    ball_movy = -ball_movy;
+                }
+                if(ballX >= acanvas.width-BALL_S-COLLISION_OFFSET || ballX <= BALL_S+COLLISION_OFFSET) {
+                    ball_movx = -ball_movx;
+                }
+                //ball diflection from bars
+                var lbarCF = 2*Math.abs(ballY-lbarY-BAR_HEIGHT/2)/BAR_HEIGHT;
+                var rbarCF = 2*Math.abs(ballY-rbarY-BAR_HEIGHT/2)/BAR_HEIGHT;
+                if ((ballX < lbarX+BAR_WIDTH+BALL_S+COLLISION_OFFSET && lbarCF <= 1)||
+                    (ballX > rbarX-BALL_S-COLLISION_OFFSET && rbarCF <= 1)) {
+                        console.log(lbarCF,rbarCF);
+                    deflection = getDeflection(ballX < BAR_WIDTH+BALL_S+COLLISION_OFFSET? lbarCF: rbarCF);
+                    ball_movx =  ball_movx*deflection.X;
+                    ball_movy =  ball_movy*deflection.Y;
+                }
+                else if(ballX <= BALL_S+COLLISION_OFFSET+BAR_WIDTH || ballX >= acanvas.width-BALL_S-COLLISION_OFFSET-BAR_WIDTH) {
+                    ball_draw = false;
+                    ball_paint = false;
+                    setTimeout(resetBall,1000);
+                }
+                ballX += ball_movx;
+                ballY += ball_movy;
             }
             function getDeflection(barCF) {
                 var factor;
@@ -106,8 +111,15 @@
                 lbar_speed = -lbar_speed;
                 return rbarY+lbar_speed;
             }
-            ballX += ball_movx;
-            ballY += ball_movy;
+            function resetBall() {
+                ballX = acanvas.width/2-BALL_S/2;
+                ballY = acanvas.height/2-BALL_S/2;
+                ball_paint = true;
+                setTimeout(function(){
+                ball_movy = ball_movy/1.2;
+                ball_draw = true;
+                },500);
+            }
         }
 
 
@@ -121,7 +133,7 @@
             context.fillRect(acanvas.width/2-DASH_W,i,DASH_W,DASH_H);
 
             context.fillStyle = Color('#000000').setAlpha(0); //Color: setting draw over to 0 alpha.
-            drawBall(Number(BALL_TRAIL));
+            ball_paint && drawBall(Number(BALL_TRAIL));
             drawLBars();
         }
 
