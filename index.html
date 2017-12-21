@@ -71,14 +71,25 @@
                 ball_movx =  ball_movx*deflection.X;
                 ball_movy =  ball_movy*deflection.Y;
             }
+            function getDeflection(barCF) {
+                var factor;
+                coefficent = Math.round(barCF*10)/10;
+                switch (coefficent) {
+                    case 0:
+                        factor = -0.5; break;
+                    case 1:
+                        factor = 1.7; break;
+                    case 0.9: case 0.8: case 0.7:
+                        factor = 1.5; break;
+                    case 0.6: case 0.5: case 0.4: case 0.3:
+                        factor = 1.2; break;
+                    default:
+                        factor = -0.8;
+                }
+                return {X:-1, Y:factor};
+            }
             ballX += ball_movx;
             ballY += ball_movy;
-            function getDeflection(barCF) {
-                var factor = 2;
-                if(barCF < 0.3)
-                factor = -3;
-                return {X:-1, Y:barCF*factor};
-            }
         }
 
 
