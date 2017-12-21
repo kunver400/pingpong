@@ -76,7 +76,6 @@
                 var rbarCF = 2*Math.abs(ballY-rbarY-BAR_HEIGHT/2)/BAR_HEIGHT;
                 if ((ballX < lbarX+BAR_WIDTH+BALL_S+COLLISION_OFFSET && lbarCF <= 1)||
                     (ballX > rbarX-BALL_S-COLLISION_OFFSET && rbarCF <= 1)) {
-                        console.log(lbarCF,rbarCF);
                     deflection = getDeflection(ballX < BAR_WIDTH+BALL_S+COLLISION_OFFSET? lbarCF: rbarCF);
                     ball_movx =  ball_movx*deflection.X;
                     ball_movy =  ball_movy*deflection.Y;
@@ -84,7 +83,7 @@
                 else if(ballX <= BALL_S+COLLISION_OFFSET+BAR_WIDTH || ballX >= acanvas.width-BALL_S-COLLISION_OFFSET-BAR_WIDTH) {
                     ball_draw = false;
                     ball_paint = false;
-                    setTimeout(resetBall,1000);
+                    setTimeout(resetBall,500);
                 }
                 ballX += ball_movx;
                 ballY += ball_movy;
@@ -114,6 +113,8 @@
             function resetBall() {
                 ballX = acanvas.width/2-BALL_S/2;
                 ballY = acanvas.height/2-BALL_S/2;
+                if(Math.abs(ball_movy)<2) // get random mov when movy too low.
+                    ball_movy += (Math.floor(Math.random() * BALL_MOV) -BALL_MOV)*(Math.abs(ball_movy)/ball_movy);
                 ball_paint = true;
                 setTimeout(function(){
                 ball_movy = ball_movy/1.2;
