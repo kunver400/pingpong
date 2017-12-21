@@ -18,7 +18,7 @@
         var mouseX,mouseY;
 
         const BALL_S = acanvas.width*acanvas.height/55555; //ball size
-        const BALL_MOV = 8; //movement speed
+        const BALL_MOV = 8; //ball movement speed
         const COLLISION_OFFSET = 5; //compression on collision
         const FPS = 60; //redraw frequency
         const BALL_TRAIL = 6; //trail length
@@ -40,8 +40,8 @@
         const BAR_WIDTH = acanvas.width/65;
         const BAR_HEIGHT = acanvas.height/4;
         const BAR_COLOR = Color('#FFFFFF').setAlpha(0.8);
-        var lbarX=0, lbarY=0;
-        var rbarX=acanvas.width - BAR_WIDTH, rbarY=0;
+        var lbarX=0, lbarY=-BAR_HEIGHT/2;
+        var rbarX=acanvas.width - BAR_WIDTH, rbarY=-BAR_HEIGHT/2, lbar_speed=2;
 
         window.onload = function() {            
             setInterval(function() {
@@ -58,22 +58,31 @@
         }
 
         function updatePositons() {
-            lbarY = mouseY - BAR_HEIGHT/2;
+            //LPlayer mouse input
+            mouseY && (lbarY = mouseY - BAR_HEIGHT/2);
+            //RPlayer logic call
+            rbarY = cpuPlaysR();
             //ball diflection from canvas edge
-            if(ballY >= acanvas.height-BALL_S+COLLISION_OFFSET || ballY <= BALL_S-COLLISION_OFFSET) {
+            if(ballY >= acanvas.height-BALL_S-COLLISION_OFFSET || ballY <= BALL_S+COLLISION_OFFSET) {
                 ball_movy = -ball_movy;
             }
-            if(ballX >= acanvas.width-BALL_S+COLLISION_OFFSET || ballX <= BALL_S-COLLISION_OFFSET) {
+            if(ballX >= acanvas.width-BALL_S-COLLISION_OFFSET || ballX <= BALL_S+COLLISION_OFFSET) {
                 ball_movx = -ball_movx;
             }
             //ball diflection from bars
             var lbarCF = 2*Math.abs(ballY-lbarY-BAR_HEIGHT/2)/BAR_HEIGHT;
             var rbarCF = 2*Math.abs(ballY-rbarY-BAR_HEIGHT/2)/BAR_HEIGHT;
-            if ((ballX < lbarX+BAR_WIDTH && lbarCF <= 1)||
-                (ballX > rbarX && rbarCF <= 1)) {
-                deflection = getDeflection(ballX < BAR_WIDTH? lbarCF: rbarCF);
+            if ((ballX < lbarX+BAR_WIDTH+BALL_S+COLLISION_OFFSET && lbarCF <= 1)||
+                (ballX > rbarX-BALL_S-COLLISION_OFFSET && rbarCF <= 1)) {
+                    console.log(lbarCF,rbarCF);
+                deflection = getDeflection(ballX < BAR_WIDTH+BALL_S+COLLISION_OFFSET? lbarCF: rbarCF);
                 ball_movx =  ball_movx*deflection.X;
                 ball_movy =  ball_movy*deflection.Y;
+            }
+            else if(ballX <= BALL_S+COLLISION_OFFSET+BAR_WIDTH || ballX >= acanvas.width-BALL_S-COLLISION_OFFSET-BAR_WIDTH) {
+                ballX = acanvas.width/2-BALL_S/2;
+                ballY = acanvas.height/2-BALL_S/2;
+                ball_movy = ball_movy/1.2;
             }
             function getDeflection(barCF) {
                 var factor;
@@ -91,6 +100,11 @@
                         factor = -0.8;
                 }
                 return {X:-1, Y:factor};
+            }
+            function cpuPlaysR() {
+                if (rbarY+BAR_HEIGHT/2 > acanvas.height || rbarY < -BAR_HEIGHT/2)
+                lbar_speed = -lbar_speed;
+                return rbarY+lbar_speed;
             }
             ballX += ball_movx;
             ballY += ball_movy;
