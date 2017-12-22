@@ -18,7 +18,7 @@
         var mouseX,mouseY;
 
         const BALL_S = acanvas.width*acanvas.height/55555; //ball size
-        const BALL_MOV = 8; //ball movement speed
+        const BALL_MOV = 8; //ball speed
         const COLLISION_OFFSET = 5; //compression on collision
         const FPS = 60; //redraw frequency
         const BALL_TRAIL = 6; //trail length
@@ -33,7 +33,10 @@
             {color:'#88FF51', arc_start:125, arc_end:240, rotation_speed:3, size_offset:0,rotaion:0},
             {color:'#51D6FF', arc_start:245, arc_end:360, rotation_speed:3, size_offset:0,rotaion:0},
         ];
-        var ball_draw = true,ball_paint = true;
+        var ball_draw = true,ball_paint = true;//!draw-> stops movment !paint->stops paint
+
+        const MISS_FOR = FPS*3;
+        var missX=0, missY=0, missfor = MISS_FOR, miss_draw = false;
 
         const DASH_W = acanvas.width/1000;
         const DASH_H = acanvas.height/20;
@@ -81,9 +84,14 @@
                     ball_movx =  ball_movx*deflection.X;
                     ball_movy =  ball_movy*deflection.Y;
                 }
-                else if(ballX <= BALL_S+COLLISION_OFFSET+BAR_WIDTH || ballX >= acanvas.width-BALL_S-COLLISION_OFFSET-BAR_WIDTH) {
+                //recenter ball on miss
+                else if(ballX <= lbarX+BAR_WIDTH+BALL_S+COLLISION_OFFSET
+                 || ballX >= rbarX-BALL_S-COLLISION_OFFSET
+                 ) {
                     ball_draw = false;
                     ball_paint = false;
+                    missX = ballX+ball_movx; missY = ballY+ball_movy;
+                    drawMiss();
                     setTimeout(resetBall,500);
                 }
                 ballX += ball_movx;
@@ -136,6 +144,7 @@
 
             context.fillStyle = Color('#000000').setAlpha(0); //Color: setting draw over to 0 alpha.
             ball_paint && drawBall(Number(BALL_TRAIL));
+            miss_draw && drawMiss();
             drawLBars();
         }
 
@@ -157,11 +166,29 @@
                 }
             });
         }
-   
+
         function drawLBars() {
             context.fillStyle = BAR_COLOR;
             context.fillRect(lbarX, lbarY, BAR_WIDTH,BAR_HEIGHT);
             context.fillRect(rbarX,rbarY,BAR_WIDTH,BAR_HEIGHT);
+        }
+        function drawMiss() {
+            if (missfor-- != 0)
+            {
+                miss_draw = true;
+                ball_comp.forEach(function(arcObj)  {
+                context.fillStyle = Color('red').setAlpha(0.4).setLightness(0.8);
+                context.beginPath();
+                context.arc(missX, missY, 2*(BALL_S+arcObj.size_offset), (Math.PI*(arcObj.arc_start-10))/180, (Math.PI*(arcObj.arc_end-10))/180);
+                context.lineTo(missX, missY);
+                context.closePath();
+                context.fill();
+            });
+            }
+            else {
+                missfor = MISS_FOR;
+                miss_draw = false;
+            }
         }
     </script>
 </html>
