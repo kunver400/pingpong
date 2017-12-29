@@ -1,6 +1,6 @@
         "use strict";
         var background = new Image();
-        background.src = "back2.png"; //background image
+        background.src = "back.png"; //background image
         var acanvas = document.getElementById('acanvas');
         var context = acanvas.getContext('2d');
         var Color = net.brehaut.Color;
@@ -46,17 +46,6 @@
                 allMisses.splice(allMisses.indexOf(inst), 1);
             },1000*MISS_FOR);
         };
-        drawMiss.prototype.draw = function() {
-                var inst = this;
-                ball_comp.forEach(function(arcObj)  {
-                    context.fillStyle = Color('red').setAlpha(0.4).setLightness(0.8);
-                    context.beginPath();
-                    context.arc(inst.x, inst.y, 2*(BALL_S+arcObj.size_offset), (Math.PI*(arcObj.arc_start-10))/180, (Math.PI*(arcObj.arc_end-10))/180);
-                    context.lineTo(inst.x, inst.y);
-                    context.closePath();
-                    context.fill();
-            });
-        };
 
 
         window.onload = function() {
@@ -101,7 +90,7 @@
                  ) {
                     ball_draw = false;
                     ball_paint = false;
-                    allMisses.push(new drawMiss(ballX, ballY));
+                    allMisses.push(new drawMiss(ballX+ball_movx, ballY+ball_movy));
                     setTimeout(resetBall,500);
                 }
                 ballX += ball_movx;
@@ -142,10 +131,12 @@
             }
         }
 
-
+//All Draw logic goes below
         function drawAll() {
-            context.drawImage(background,0,0,background.width,background.height,0,0,acanvas.width,acanvas.height); 
-            context.fillStyle = Color('#FFFFFF').setAlpha(0.2);
+            // context.drawImage(background,0,0,background.width,background.height,0,0,acanvas.width,acanvas.height); 
+            // context.fillStyle = Color('#FFFFFF').setAlpha(0.2);
+            // context.fillRect(0,0,acanvas.width,acanvas.height);
+            context.fillStyle = Color('#080219');
             context.fillRect(0,0,acanvas.width,acanvas.height);
 
             context.fillStyle = '#FFFFFF';
@@ -186,3 +177,15 @@
             context.fillRect(lbarX, lbarY, BAR_WIDTH,BAR_HEIGHT);
             context.fillRect(rbarX,rbarY,BAR_WIDTH,BAR_HEIGHT);
         }
+
+        drawMiss.prototype.draw = function() {
+            var inst = this;
+            ball_comp.forEach(function(arcObj)  {
+                context.fillStyle = Color('red').setAlpha(0.4).setLightness(0.8);
+                context.beginPath();
+                context.arc(inst.x, inst.y, 2*(BALL_S+arcObj.size_offset), (Math.PI*(arcObj.arc_start-10))/180, (Math.PI*(arcObj.arc_end-10))/180);
+                context.lineTo(inst.x, inst.y);
+                context.closePath();
+                context.fill();
+        });
+    };
