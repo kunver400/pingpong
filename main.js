@@ -11,7 +11,7 @@
         const COLLISION_OFFSET = 5; //compression on collision
         const FPS = 60; //redraw frequency
         const BALL_TRAIL = 6; //trail length
-        const DEFLECTIONS = [1.7,1.5,1.2,-0.8,-0.5]
+        const DEFLECTIONS = [1.4,1.3,1.2,1.1,1]
         var ball_movx = BALL_MOV;
         var ball_movy = BALL_MOV;
         var ballX = acanvas.width/2-BALL_S/2;
@@ -35,8 +35,9 @@
         const BAR_HEIGHT = acanvas.height/4;
         const BAR_COLOR = Color('#FFFFFF').setAlpha(0.8);
         var lbarX=0, lbarY=-BAR_HEIGHT/2;
-        var rbarX=acanvas.width - BAR_WIDTH, rbarY=-BAR_HEIGHT/2, lbar_speed=2;
+        var rbarX=acanvas.width - BAR_WIDTH, rbarY=-BAR_HEIGHT/2, rbar_speed=2;
 
+        var lbar_speed = 1;
 
         var drawMiss = function(x, y) {
             var inst = this;
@@ -54,6 +55,12 @@
                 drawAll();
                 updatePositons();
             },1000/FPS);
+            var lbarY_old = lbarY;
+            setInterval(function(){
+            lbar_speed = Math.round((lbarY_old-lbarY)/acanvas.height*10)/10;
+            lbarY_old = lbarY;
+            console.log(lbar_speed);
+            },10000/FPS);
         }
         function bindEvents()  {
         acanvas.addEventListener('mousemove',function(event) {
@@ -83,6 +90,7 @@
                     var deflection = getDeflection(ballX < BAR_WIDTH+BALL_S+COLLISION_OFFSET? lbarCF: rbarCF);
                     ball_movx =  ball_movx*deflection.X;
                     ball_movy =  ball_movy*deflection.Y;
+                    console.log(deflection);
                 }
                 //recenter ball on miss
                 else if(ballX <= lbarX+BAR_WIDTH+BALL_S+COLLISION_OFFSET
@@ -111,12 +119,12 @@
                     default:
                         factor = DEFLECTIONS[3];
                 }
-                return {X:-1, Y:factor};
+                return {X:-1, Y:(factor+Math.abs(lbar_speed)) * ((Math.abs(ball_movy)/ball_movy)*(Math.abs(lbar_speed)/lbar_speed)> -1?-1:1)};
             }
             function cpuPlaysR() {
                 if (rbarY+BAR_HEIGHT/2 > acanvas.height || rbarY < -BAR_HEIGHT/2)
-                lbar_speed = -lbar_speed;
-                return rbarY+lbar_speed;
+                rbar_speed = -rbar_speed;
+                return rbarY+rbar_speed;
             }
             function resetBall() {
                 ballX = acanvas.width/2-BALL_S/2;
@@ -183,7 +191,7 @@
             ball_comp.forEach(function(arcObj)  {
                 context.fillStyle = Color('red').setAlpha(0.4).setLightness(0.8);
                 context.beginPath();
-                context.arc(inst.x, inst.y, 2*(BALL_S+arcObj.size_offset), (Math.PI*(arcObj.arc_start-10))/180, (Math.PI*(arcObj.arc_end-10))/180);
+                context.arc(inst.x, inst.y, 2*(BALL_S+arcObj.size_offset), (Math.PI*(arcObj.arc_start-10))/180, (Math.PI*(arcObj.arc_end+10))/180);
                 context.lineTo(inst.x, inst.y);
                 context.closePath();
                 context.fill();
