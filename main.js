@@ -35,9 +35,9 @@
         const BAR_HEIGHT = acanvas.height/4;
         const BAR_COLOR = Color('#FFFFFF').setAlpha(0.8);
         var lbarX=0, lbarY=-BAR_HEIGHT/2;
-        var rbarX=acanvas.width - BAR_WIDTH, rbarY=-BAR_HEIGHT/2, rbar_speed=2;
+        var rbarX=acanvas.width - BAR_WIDTH, rbarY=-BAR_HEIGHT/2, rbar_movY=4;
 
-        var lbar_speed = 1;
+        var lbar_speed = 1,rbar_speed = 1;
 
         var drawMiss = function(x, y) {
             var inst = this;
@@ -56,10 +56,12 @@
                 updatePositons();
             },1000/FPS);
             var lbarY_old = lbarY;
+            var rbarY_old = rbarY;
             setInterval(function(){
             lbar_speed = Math.round((lbarY_old-lbarY)/acanvas.height*10)/10;
             lbarY_old = lbarY;
-            console.log(lbar_speed);
+            rbar_speed = Math.round((rbarY_old-rbarY)/acanvas.height*10)/10;
+            rbarY_old = rbarY;
             },10000/FPS);
         }
         function bindEvents()  {
@@ -87,7 +89,7 @@
                 var rbarCF = 2*Math.abs(ballY-rbarY-BAR_HEIGHT/2)/BAR_HEIGHT;
                 if ((ballX < lbarX+BAR_WIDTH+BALL_S+COLLISION_OFFSET && lbarCF <= 1)||
                     (ballX > rbarX-BALL_S-COLLISION_OFFSET && rbarCF <= 1)) {
-                    var deflection = getDeflection(ballX < BAR_WIDTH+BALL_S+COLLISION_OFFSET? lbarCF: rbarCF);
+                    var deflection = getDeflection(ballX < BAR_WIDTH+BALL_S+COLLISION_OFFSET? lbarCF: rbarCF, ballX < BAR_WIDTH+BALL_S+COLLISION_OFFSET? lbar_speed: rbar_speed);
                     ball_movx =  ball_movx*deflection.X;
                     ball_movy =  ball_movy*deflection.Y;
                     console.log(deflection);
@@ -104,7 +106,7 @@
                 ballX += ball_movx;
                 ballY += ball_movy;
             }
-            function getDeflection(barCF) {
+            function getDeflection(barCF, speed) {
                 var factor;
                 var coefficent = Math.round(barCF*10)/10;
                 switch (coefficent) {
@@ -119,12 +121,12 @@
                     default:
                         factor = DEFLECTIONS[3];
                 }
-                return {X:-1, Y:(factor+Math.abs(lbar_speed)) * ((Math.abs(ball_movy)/ball_movy)*(Math.abs(lbar_speed)/lbar_speed)> -1?-1:1)};
+                return {X:-1, Y:(factor+Math.abs(speed)) * ((Math.abs(ball_movy)/ball_movy)*(Math.abs(speed)/speed)> -1?-1:1)};
             }
             function cpuPlaysR() {
                 if (rbarY+BAR_HEIGHT/2 > acanvas.height || rbarY < -BAR_HEIGHT/2)
-                rbar_speed = -rbar_speed;
-                return rbarY+rbar_speed;
+                rbar_movY = -rbar_movY;
+                return rbarY+rbar_movY;
             }
             function resetBall() {
                 ballX = acanvas.width/2-BALL_S/2;
