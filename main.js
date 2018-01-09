@@ -34,9 +34,11 @@
         const BAR_WIDTH = acanvas.width/65;
         const BAR_HEIGHT = acanvas.height/4;
         const BAR_COLOR = Color('#FFFFFF').setAlpha(0.8);
+        const BARSPEED_CPU = 4;
         var lbarX=0, lbarY=-BAR_HEIGHT/2;
-        var rbarX=acanvas.width - BAR_WIDTH, rbarY=-BAR_HEIGHT/2, rbar_movY=4;
-
+        var rbarX=acanvas.width - BAR_WIDTH, rbarY=-BAR_HEIGHT/2, rbar_movY=BARSPEED_CPU;
+        var rbar_dir = 1; //1 down -1 up
+        //for bar speed impact logic
         var lbar_speed = 1,rbar_speed = 1;
 
         var drawMiss = function(x, y) {
@@ -124,8 +126,11 @@
                 return {X:-1, Y:(factor+Math.abs(speed)) * ((Math.abs(ball_movy)/ball_movy)*(Math.abs(speed)/speed)> -1?-1:1)};
             }
             function cpuPlaysR() {
-                if (rbarY+BAR_HEIGHT/2 > acanvas.height || rbarY < -BAR_HEIGHT/2)
-                rbar_movY = -rbar_movY;
+                if ((rbarY+BAR_HEIGHT/2 > acanvas.height || rbarY < -BAR_HEIGHT/2) || (ball_draw &&
+                    ((rbar_dir == -1 &&  ballY > rbarY+BAR_HEIGHT/2) ||
+                    (rbar_dir == 1 &&  ballY < rbarY+BAR_HEIGHT/2))
+                ))
+                {rbar_movY = -rbar_movY; rbar_dir = - rbar_dir;}
                 return rbarY+rbar_movY;
             }
             function resetBall() {
