@@ -22,7 +22,7 @@
             {color:'#88FF51', arc_start:125, arc_end:240, rotation_speed:3, size_offset:0,rotaion:0},
             {color:'#51D6FF', arc_start:245, arc_end:360, rotation_speed:3, size_offset:0,rotaion:0},
         ];
-        var ball_draw = true,ball_paint = true;//!draw-> stops movment !paint->stops paint
+        var ball_move = true,ball_paint = true;//!draw-> stops movment !move->stops paint
 
         const MISS_FOR = 3;
         var allMisses = [];
@@ -34,10 +34,13 @@
         const BAR_WIDTH = acanvas.width/65;
         const BAR_HEIGHT = acanvas.height/4;
         const BAR_COLOR = Color('#FFFFFF').setAlpha(0.8);
-        const BARSPEED_CPU = 4;
         var lbarX=0, lbarY=-BAR_HEIGHT/2;
+
+        const BARSPEED_CPU = 4;
+        const BARACCS_CPU = [1/(2*FPS), 1/FPS, 1.5/FPS];
         var rbarX=acanvas.width - BAR_WIDTH, rbarY=-BAR_HEIGHT/2, rbar_movY=BARSPEED_CPU;
         var rbar_dir = 1; //1 down -1 up
+
         //for bar speed impact logic
         var lbar_speed = 1,rbar_speed = 1;
 
@@ -78,7 +81,7 @@
             mouseY && (lbarY = mouseY - BAR_HEIGHT/2);
             //RPlayer logic call
             rbarY = cpuPlaysR();
-            if(ball_draw) {
+            if(ball_move) {
                 //ball diflection from canvas edge
                 if(ballY >= acanvas.height-BALL_S-COLLISION_OFFSET || ballY <= BALL_S+COLLISION_OFFSET) {
                     ball_movy = -ball_movy;
@@ -100,7 +103,7 @@
                 else if(ballX <= lbarX+BAR_WIDTH+BALL_S+COLLISION_OFFSET
                  || ballX >= rbarX-BALL_S-COLLISION_OFFSET
                  ) {
-                    ball_draw = false;
+                    ball_move = false;
                     ball_paint = false;
                     allMisses.push(new drawMiss(ballX+ball_movx, ballY+ball_movy));
                     setTimeout(resetBall,500);
@@ -126,22 +129,25 @@
                 return {X:-1, Y:(factor+Math.abs(speed)) * ((Math.abs(ball_movy)/ball_movy)*(Math.abs(speed)/speed)> -1?-1:1)};
             }
             function cpuPlaysR() {
-                if ((rbarY+BAR_HEIGHT/2 > acanvas.height || rbarY < -BAR_HEIGHT/2) || (ball_draw &&
+                if ((rbarY+BAR_HEIGHT/2 > acanvas.height || rbarY < -BAR_HEIGHT/2) || (ball_move && ball_movx > 0 &&
                     ((rbar_dir == -1 &&  ballY > rbarY+BAR_HEIGHT/2) ||
                     (rbar_dir == 1 &&  ballY < rbarY+BAR_HEIGHT/2))
                 ))
                 {rbar_movY = -rbar_movY; rbar_dir = - rbar_dir;}
+                if(ball_movx > 0 && (Math.abs(rbarY+BAR_HEIGHT/2 - ballY) > acanvas.height/4))
+                rbar_movY += rbar_movY* BARACCS_CPU[0];
                 return rbarY+rbar_movY;
             }
             function resetBall() {
                 ballX = acanvas.width/2-BALL_S/2;
                 ballY = acanvas.height/2-BALL_S/2;
+                rbar_movY = (Math.abs(rbar_movY)/rbar_movY)*BARSPEED_CPU;
                 if(Math.abs(ball_movy)<2) // get random mov when movy too low.
                     ball_movy += (Math.floor(Math.random() * BALL_MOV*DEFLECTIONS[0]) -BALL_MOV*DEFLECTIONS[0])*(Math.abs(ball_movy)/ball_movy);
                 ball_paint = true;
                 setTimeout(function(){
                 ball_movy = ball_movy/1.2;
-                ball_draw = true;
+                ball_move = true;
                 },500);
             }
         }
